@@ -15,9 +15,8 @@ env:
   FRONTEND_IMAGE: ghcr.io/${{ github.repository }}/jerney-frontend
 
 jobs:
-
   # ==============================================================
-  # LINT
+  # 1️⃣ Lint
   # ==============================================================
 
   lint:
@@ -26,10 +25,8 @@ jobs:
     strategy:
       matrix:
         component: [backend, frontend]
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -52,7 +49,7 @@ jobs:
         run: npm run lint
 
   # ==============================================================
-  # SCA - Dependency Scan
+  # 2️⃣ SCA - Dependency Audit
   # ==============================================================
 
   sca:
@@ -62,7 +59,6 @@ jobs:
     strategy:
       matrix:
         component: [backend, frontend]
-
     steps:
       - uses: actions/checkout@v4
 
@@ -87,7 +83,7 @@ jobs:
         run: npm audit --audit-level=high || true
 
   # ==============================================================
-  # BUILD CONTAINER
+  # 3️⃣ Build & Push Docker Images
   # ==============================================================
 
   build:
@@ -97,11 +93,9 @@ jobs:
     permissions:
       contents: read
       packages: write
-
     strategy:
       matrix:
         component: [backend, frontend]
-
     steps:
       - uses: actions/checkout@v4
 
@@ -121,7 +115,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}/jerney-${{ matrix.component }}
 
-      - name: Build and push
+      - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
           context: ./${{ matrix.component }}
@@ -134,7 +128,7 @@ jobs:
           sbom: true
 
   # ==============================================================
-  # IMAGE SECURITY SCAN (Trivy)
+  # 4️⃣ Container Image Scan (Trivy)
   # ==============================================================
 
   image-scan:
@@ -144,7 +138,6 @@ jobs:
     strategy:
       matrix:
         component: [backend, frontend]
-
     steps:
       - uses: actions/checkout@v4
 
@@ -160,7 +153,7 @@ jobs:
           ignore-unfixed: true
 
   # ==============================================================
-  # DOCKERFILE LINT (Hadolint)
+  # 5️⃣ Dockerfile Lint (Hadolint)
   # ==============================================================
 
   dockerfile-lint:
@@ -169,7 +162,6 @@ jobs:
     strategy:
       matrix:
         component: [backend, frontend]
-
     steps:
       - uses: actions/checkout@v4
 
